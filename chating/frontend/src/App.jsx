@@ -5,20 +5,15 @@ import './App.css'
 const cards = [
   {
     title: 'My Rooms',
-    topic: '/topic/cricket',
-    description: 'Live match commentary and score updates.',
+    topic: '/topic/room/{id}',
+    description: "Rooms you've joined. Jump back in and pick up the conversation in real time.",
     action: true,
     path: '/my-rooms-list',
   },
   {
-    title: 'Orders',
-    topic: '/topic/orders',
-    description: 'Real-time order status broadcast to all clients.',
-  },
-  {
     title: 'Admin Rooms',
-    topic: '/topic/messages',
-    description: 'Open room for everyone connected over WebSocket.',
+    topic: '/topic/room/{id}',
+    description: 'Browse every room or create a new one for others to join.',
     action: true,
     path: '/admin-room-list',
   },
@@ -56,12 +51,12 @@ function App() {
     <main className="dashboard">
       <header className="dashboard-header">
         <h1>Dashboard</h1>
-        <p>Pick a topic to start chatting over WebSocket.</p>
+        <p>Jump into a room and start chatting in real time.</p>
       </header>
 
       <section className="card-grid">
         {cards.map((card) => (
-          <article key={card.topic} className="card">
+          <article key={card.path} className="card">
             <h2>{card.title}</h2>
             <p className="card-desc">{card.description}</p>
             <code>{card.topic}</code>
