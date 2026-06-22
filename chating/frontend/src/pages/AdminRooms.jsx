@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { fetchRooms, createRoom } from '../store/roomsSlice'
-import './RoomsList.css'
+import './CSS/RoomsList.css'
 
 function initials(name) {
   return name

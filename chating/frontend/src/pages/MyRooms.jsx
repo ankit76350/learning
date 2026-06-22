@@ -7,7 +7,7 @@ import {
   leaveRoom,
   clearJoinError,
 } from '../store/roomsSlice'
-import './RoomsList.css'
+import './CSS/RoomsList.css'
 
 function initials(name) {
   return name

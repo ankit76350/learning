@@ -7,7 +7,7 @@ import {
   clearMessages,
 } from '../store/messagesSlice'
 import { connectToRoom, sendMessage as publishMessage } from '../api/chatSocket'
-import './ChatRoom.css'
+import './CSS/ChatRoom.css'
 
 // Backend timestamps are ISO strings (LocalDateTime); format to HH:MM.
 function formatTime(timestamp) {
