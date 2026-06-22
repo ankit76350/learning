@@ -13,7 +13,7 @@ function initials(name) {
     .toUpperCase()
 }
 
-function RoomList() {
+function AdminRooms() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { items: rooms, status, creating, error } = useSelector(
@@ -33,7 +33,7 @@ function RoomList() {
   return (
     <main className="rooms">
       <header className="rooms-header">
-        <h1>Rooms</h1>
+        <h1>Admin Rooms</h1>
         <button
           type="button"
           className="new-room-btn"
@@ -70,4 +70,4 @@ function RoomList() {
   )
 }
 
-export default RoomList
+export default AdminRooms

@@ -5,7 +5,8 @@ import { Provider } from 'react-redux'
 import { store } from './store/store.js'
 import './index.css'
 import App from './App.jsx'
-import RoomList from './pages/RoomList.jsx'
+import MyRooms from './pages/MyRooms.jsx'
+import AdminRooms from './pages/AdminRooms.jsx'
 import ChatRoom from './pages/ChatRoom.jsx'
 
 createRoot(document.getElementById('root')).render(
@@ -14,8 +15,8 @@ createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} />
-          <Route path="/my-rooms-list" element={<RoomList />} />
-          <Route path="/admin-room-list" element={<RoomList />} />
+          <Route path="/my-rooms-list" element={<MyRooms />} />
+          <Route path="/admin-room-list" element={<AdminRooms />} />
           <Route path="/chat/:roomId" element={<ChatRoom />} />
         </Routes>
       </BrowserRouter>

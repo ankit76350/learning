@@ -16,12 +16,11 @@ function ChatRoom() {
   const { roomId } = useParams()
   const navigate = useNavigate()
 
-  // The name lives in the URL (?name=...) so it's visible in the address bar
-  // and survives refresh. An inline form sets it (not window.prompt, which
-  // would fire twice under React StrictMode in development).
+  // The name was collected earlier on the dashboard's "Open Room" button and
+  // saved in localStorage. We just read it here and mirror it to the URL
+  // (?name=...) so it shows in the address bar.
   const [searchParams, setSearchParams] = useSearchParams()
-  const username = searchParams.get('name') || ''
-  const [nameDraft, setNameDraft] = useState('')
+  const username = localStorage.getItem('chatUserName') || ''
 
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
@@ -31,12 +30,17 @@ function ChatRoom() {
   // Current user shown first, then the mock participants.
   const participants = [username, ...mockParticipants]
 
-  function submitName(e) {
-    e.preventDefault()
-    const name = nameDraft.trim()
-    if (!name) return
-    setSearchParams({ name })
-  }
+  // If we somehow reached a room without a stored name, go back to the start.
+  useEffect(() => {
+    if (!username) navigate('/', { replace: true })
+  }, [username, navigate])
+
+  // Keep the URL in sync with the known name.
+  useEffect(() => {
+    if (username && searchParams.get('name') !== username) {
+      setSearchParams({ name: username }, { replace: true })
+    }
+  }, [username, searchParams, setSearchParams])
 
   // Auto-scroll to the latest message.
   useEffect(() => {
@@ -55,36 +59,8 @@ function ChatRoom() {
     setDraft('')
   }
 
-  // Ask for a name before showing the chat.
-  if (!username) {
-    return (
-      <main className="chat">
-        <header className="chat-header">
-          <button
-            type="button"
-            className="chat-back"
-            onClick={() => navigate(-1)}
-          >
-            ← Back
-          </button>
-        </header>
-
-        <form className="chat-name-gate" onSubmit={submitName}>
-          <h2>Enter your name to join</h2>
-          <input
-            type="text"
-            value={nameDraft}
-            onChange={(e) => setNameDraft(e.target.value)}
-            placeholder="Your name"
-            autoFocus
-          />
-          <button type="submit" disabled={!nameDraft.trim()}>
-            Join chat
-          </button>
-        </form>
-      </main>
-    )
-  }
+  // Nothing to render until the redirect above kicks in.
+  if (!username) return null
 
   return (
     <main className="chat">
