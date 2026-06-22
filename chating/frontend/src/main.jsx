@@ -8,17 +8,22 @@ import App from './App.jsx'
 import MyRooms from './pages/MyRooms.jsx'
 import AdminRooms from './pages/AdminRooms.jsx'
 import ChatRoom from './pages/ChatRoom.jsx'
+import NotificationProvider from './components/NotificationProvider.jsx'
+import NotificationToasts from './components/NotificationToasts.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
+        {/* Global, route-independent: listens to all joined rooms and shows toasts. */}
+        <NotificationProvider />
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/my-rooms-list" element={<MyRooms />} />
           <Route path="/admin-room-list" element={<AdminRooms />} />
           <Route path="/chat/:roomId" element={<ChatRoom />} />
         </Routes>
+        <NotificationToasts />
       </BrowserRouter>
     </Provider>
   </StrictMode>,

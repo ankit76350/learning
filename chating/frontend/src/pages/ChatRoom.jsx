@@ -6,6 +6,7 @@ import {
   addMessage,
   clearMessages,
 } from '../store/messagesSlice'
+import { setActiveRoom, clearActiveRoom } from '../store/notificationsSlice'
 import { connectToRoom, sendMessage as publishMessage } from '../api/chatSocket'
 import './CSS/ChatRoom.css'
 
@@ -53,6 +54,14 @@ function ChatRoom() {
       setSearchParams({ name: username }, { replace: true })
     }
   }, [username, searchParams, setSearchParams])
+
+  // Tell the global notifier which room is open so it won't toast this one.
+  useEffect(() => {
+    dispatch(setActiveRoom(roomId))
+    return () => {
+      dispatch(clearActiveRoom())
+    }
+  }, [dispatch, roomId])
 
   // 1) Load the room's message history, clearing it on leave.
   useEffect(() => {
