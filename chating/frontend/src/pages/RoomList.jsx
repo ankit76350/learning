@@ -1,11 +1,7 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchRooms, createRoom } from '../store/roomsSlice'
 import './RoomsList.css'
-
-const initialrooms = [
-  { id: 1, name: 'Cricket Room', lastMessage: 'India needs 12 off 6 balls!' },
-  { id: 2, name: 'Orders', lastMessage: 'Order #1042 has been shipped.' },
-  { id: 3, name: 'General room', lastMessage: 'Hey everyone 👋' },
-]
 
 function initials(name) {
   return name
@@ -16,27 +12,38 @@ function initials(name) {
     .toUpperCase()
 }
 
-function roomList() {
-  const [rooms, setrooms] = useState(initialrooms)
+function RoomList() {
+  const dispatch = useDispatch()
+  const { items: rooms, status, creating, error } = useSelector(
+    (state) => state.rooms,
+  )
+
+  useEffect(() => {
+    dispatch(fetchRooms())
+  }, [dispatch])
 
   function addroom() {
     const name = window.prompt('Enter a name for the new room')
     if (!name || !name.trim()) return
-
-    setrooms((prev) => [
-      ...prev,
-      { id: Date.now(), name: name.trim(), lastMessage: 'No messages yet' },
-    ])
+    dispatch(createRoom(name.trim()))
   }
 
   return (
     <main className="rooms">
       <header className="rooms-header">
         <h1>Rooms</h1>
-        <button type="button" className="new-room-btn" onClick={addroom}>
-          + Add New Room
+        <button
+          type="button"
+          className="new-room-btn"
+          onClick={addroom}
+          disabled={creating}
+        >
+          {creating ? 'Adding…' : '+ Add New Room'}
         </button>
       </header>
+
+      {status === 'loading' && <p>Loading rooms…</p>}
+      {error && <p className="rooms-error">{error}</p>}
 
       <ul className="room-list">
         {rooms.map((room) => (
@@ -44,13 +51,17 @@ function roomList() {
             <span className="room-avatar">{initials(room.name)}</span>
             <div className="room-info">
               <span className="room-name">{room.name}</span>
-              <span className="room-last">{room.lastMessage}</span>
+              <span className="room-last">{room.id}</span>
             </div>
           </li>
         ))}
       </ul>
+
+      {status === 'succeeded' && rooms.length === 0 && (
+        <p>No rooms yet. Create one!</p>
+      )}
     </main>
   )
 }
 
-export default roomList
+export default RoomList
