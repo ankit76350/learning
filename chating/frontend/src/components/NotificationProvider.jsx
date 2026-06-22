@@ -37,6 +37,7 @@ function NotificationProvider() {
 
     const roomIds = roomKey.split(',')
     const client = connectToRooms(roomIds, (roomId, message) => {
+      //! when the backend broadcasts to /topic/room/C, only the C subscription fires, and it calls onMessage("C", message) — your handler knows it was room C, not A or E.
       // Ignore our own messages and the room we're actively viewing.
       if (message.sender === username) return
       if (roomId === activeRoomRef.current) return
