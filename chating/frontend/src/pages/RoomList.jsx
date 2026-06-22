@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { fetchRooms, createRoom } from '../store/roomsSlice'
 import './RoomsList.css'
 
@@ -14,6 +15,7 @@ function initials(name) {
 
 function RoomList() {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { items: rooms, status, creating, error } = useSelector(
     (state) => state.rooms,
   )
@@ -47,7 +49,11 @@ function RoomList() {
 
       <ul className="room-list">
         {rooms.map((room) => (
-          <li key={room.id} className="room-item">
+          <li
+            key={room.id}
+            className="room-item"
+            onClick={() => navigate(`/chat/${room.id}`)}
+          >
             <span className="room-avatar">{initials(room.name)}</span>
             <div className="room-info">
               <span className="room-name">{room.name}</span>

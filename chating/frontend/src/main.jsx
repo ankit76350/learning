@@ -6,6 +6,7 @@ import { store } from './store/store.js'
 import './index.css'
 import App from './App.jsx'
 import RoomList from './pages/RoomList.jsx'
+import ChatRoom from './pages/ChatRoom.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/" element={<App />} />
           <Route path="/my-rooms-list" element={<RoomList />} />
           <Route path="/admin-room-list" element={<RoomList />} />
+          <Route path="/chat/:roomId" element={<ChatRoom />} />
         </Routes>
       </BrowserRouter>
     </Provider>
