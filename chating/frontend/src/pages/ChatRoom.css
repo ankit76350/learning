@@ -53,6 +53,11 @@
   color: var(--accent);
 }
 
+.chat-status {
+  color: #f59e0b;
+  font-style: normal;
+}
+
 .chat-online {
   margin-left: auto;
   display: inline-flex;

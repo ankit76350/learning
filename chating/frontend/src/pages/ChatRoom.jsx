@@ -1,9 +1,18 @@
 import { useState, useRef, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import {
+  fetchMessages,
+  addMessage,
+  clearMessages,
+} from '../store/messagesSlice'
+import { connectToRoom, sendMessage as publishMessage } from '../api/chatSocket'
 import './ChatRoom.css'
 
-function timeNow() {
-  return new Date().toLocaleTimeString([], {
+// Backend timestamps are ISO strings (LocalDateTime); format to HH:MM.
+function formatTime(timestamp) {
+  if (!timestamp) return ''
+  return new Date(timestamp).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
   })
@@ -15,6 +24,7 @@ const mockParticipants = ['Riya', 'Aman', 'Sophia', 'Karan']
 function ChatRoom() {
   const { roomId } = useParams()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   // The name was collected earlier on the dashboard's "Open Room" button and
   // saved in localStorage. We just read it here and mirror it to the URL
@@ -22,10 +32,12 @@ function ChatRoom() {
   const [searchParams, setSearchParams] = useSearchParams()
   const username = localStorage.getItem('chatUserName') || ''
 
-  const [messages, setMessages] = useState([])
+  const messages = useSelector((state) => state.messages.items)
   const [draft, setDraft] = useState('')
+  const [connected, setConnected] = useState(false)
   const [showParticipants, setShowParticipants] = useState(false)
   const bottomRef = useRef(null)
+  const clientRef = useRef(null)
 
   // Current user shown first, then the mock participants.
   const participants = [username, ...mockParticipants]
@@ -42,6 +54,30 @@ function ChatRoom() {
     }
   }, [username, searchParams, setSearchParams])
 
+  // 1) Load the room's message history, clearing it on leave.
+  useEffect(() => {
+    if (!username) return
+    dispatch(fetchMessages(roomId))
+    return () => {
+      dispatch(clearMessages())
+    }
+  }, [dispatch, roomId, username])
+
+  // 2) Open the live connection and push every broadcast message into the store.
+  useEffect(() => {
+    if (!username) return
+    const client = connectToRoom(
+      roomId,
+      (message) => dispatch(addMessage(message)),
+      setConnected,
+    )
+    clientRef.current = client
+    return () => {
+      client.deactivate()
+      clientRef.current = null
+    }
+  }, [dispatch, roomId, username])
+
   // Auto-scroll to the latest message.
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -50,12 +86,14 @@ function ChatRoom() {
   function sendMessage(e) {
     e.preventDefault()
     const text = draft.trim()
-    if (!text) return
+    if (!text || !clientRef.current) return
 
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), sender: username, text, time: timeNow() },
-    ])
+    // Server stamps timestamp + id and broadcasts it back to us, so we don't
+    // add it optimistically (that would show it twice).
+    publishMessage(clientRef.current, roomId, {
+      sender: username,
+      content: text,
+    })
     setDraft('')
   }
 
@@ -77,6 +115,7 @@ function ChatRoom() {
           <code>{roomId}</code>
           <p className="chat-you">
             you are &quot;<strong>{username}</strong>&quot;
+            {!connected && <em className="chat-status"> · connecting…</em>}
           </p>
         </div>
 
@@ -105,8 +144,8 @@ function ChatRoom() {
             }
           >
             <span className="chat-sender">{msg.sender}</span>
-            <span className="chat-text">{msg.text}</span>
-            <span className="chat-time">{msg.time}</span>
+            <span className="chat-text">{msg.content}</span>
+            <span className="chat-time">{formatTime(msg.timestamp)}</span>
           </div>
         ))}
         <div ref={bottomRef} />
@@ -120,7 +159,7 @@ function ChatRoom() {
           placeholder="Type a message…"
           autoFocus
         />
-        <button type="submit" disabled={!draft.trim()}>
+        <button type="submit" disabled={!draft.trim() || !connected}>
           Send
         </button>
       </form>
