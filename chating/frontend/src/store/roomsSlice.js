@@ -4,6 +4,7 @@ import {
   createRoomApi,
   fetchRoomsByUserApi,
   joinRoomApi,
+  leaveRoomApi,
 } from '../api/roomApi'
 
 // GET /api/rooms -> returns the full list of rooms
@@ -32,6 +33,15 @@ export const joinRoom = createAsyncThunk(
   },
 )
 
+// POST /api/rooms/{id}/leave -> removes the user from the room, returns the room
+export const leaveRoom = createAsyncThunk(
+  'rooms/leaveRoom',
+  async ({ roomId, username }) => {
+    await leaveRoomApi(roomId, username)
+    return roomId
+  },
+)
+
 const roomsSlice = createSlice({
   name: 'rooms',
   initialState: {
@@ -45,10 +55,15 @@ const roomsSlice = createSlice({
     myError: null,
     joining: false,
     joinError: null,
+    leavingRoomId: null,
+    leaveError: null,
   },
   reducers: {
     clearJoinError: (state) => {
       state.joinError = null
+    },
+    clearLeaveError: (state) => {
+      state.leaveError = null
     },
   },
   extraReducers: (builder) => {
@@ -110,9 +125,23 @@ const roomsSlice = createSlice({
         state.joining = false
         state.joinError = action.error.message
       })
+      // leave a room
+      .addCase(leaveRoom.pending, (state, action) => {
+        state.leavingRoomId = action.meta.arg.roomId
+        state.leaveError = null
+      })
+      .addCase(leaveRoom.fulfilled, (state, action) => {
+        state.leavingRoomId = null
+        // action.payload is the roomId that was left.
+        state.myRooms = state.myRooms.filter((r) => r.id !== action.payload)
+      })
+      .addCase(leaveRoom.rejected, (state, action) => {
+        state.leavingRoomId = null
+        state.leaveError = action.error.message
+      })
   },
 })
 
-export const { clearJoinError } = roomsSlice.actions
+export const { clearJoinError, clearLeaveError } = roomsSlice.actions
 
 export default roomsSlice.reducer

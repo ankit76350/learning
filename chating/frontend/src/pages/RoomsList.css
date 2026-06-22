@@ -89,6 +89,34 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1;
+}
+
+.room-leave-btn {
+  flex-shrink: 0;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #e5484d;
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.room-leave-btn:hover {
+  border-color: #e5484d;
+  background: rgba(229, 72, 77, 0.08);
+}
+
+.room-leave-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.room-leave-btn:focus-visible {
+  outline: 2px solid #e5484d;
+  outline-offset: 2px;
 }
 
 .room-name {

@@ -70,6 +70,28 @@ public class RoomController {
         return ResponseEntity.ok(room);
     }
 
+    @PostMapping("/{id}/leave")
+    public ResponseEntity<?> leaveRoom(@PathVariable String id, @RequestBody Map<String, String> body) {
+        Optional<ChatRoom> roomOpt = roomRepository.findById(id);
+        if (roomOpt.isEmpty()) {
+            return new ResponseEntity<>(Map.of("message", "Room does not exist or invalid room ID"),
+                    HttpStatus.NOT_FOUND);
+        }
+
+        String username = body.get("username");
+        if (username == null || username.trim().isEmpty()) {
+            return new ResponseEntity<>(Map.of("message", "Username is required"),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        ChatRoom room = roomOpt.get();
+        if (room.getUsers().remove(username)) {
+            room = roomRepository.save(room);
+        }
+
+        return ResponseEntity.ok(room);
+    }
+
     private String generateRoomId() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         StringBuilder sb1 = new StringBuilder();

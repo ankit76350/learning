@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { fetchRoomsByUser, joinRoom, clearJoinError } from '../store/roomsSlice'
+import {
+  fetchRoomsByUser,
+  joinRoom,
+  leaveRoom,
+  clearJoinError,
+} from '../store/roomsSlice'
 import './RoomsList.css'
 
 function initials(name) {
@@ -19,9 +24,8 @@ function MyRooms() {
   const storedName = localStorage.getItem('chatUserName') || ''
   const username = storedName || 'there'
 
-  const { myRooms, myStatus, myError, joining, joinError } = useSelector(
-    (state) => state.rooms,
-  )
+  const { myRooms, myStatus, myError, joining, joinError, leavingRoomId, leaveError } =
+    useSelector((state) => state.rooms)
 
   const [showJoin, setShowJoin] = useState(false)
   const [roomIdDraft, setRoomIdDraft] = useState('')
@@ -53,6 +57,15 @@ function MyRooms() {
     dispatch(clearJoinError())
   }
 
+  // Remove the current user from a room. Stop propagation so the row's
+  // navigate-to-chat click doesn't also fire.
+  function handleLeave(e, roomId) {
+    e.stopPropagation()
+    if (!storedName) return
+    if (!window.confirm('Remove yourself from this room?')) return
+    dispatch(leaveRoom({ roomId, username: storedName }))
+  }
+
   return (
     <main className="rooms">
       <header className="rooms-header">
@@ -68,6 +81,7 @@ function MyRooms() {
 
       {myStatus === 'loading' && <p>Loading your rooms…</p>}
       {myError && <p className="rooms-error">{myError}</p>}
+      {leaveError && <p className="rooms-error">{leaveError}</p>}
 
       {myStatus === 'succeeded' && myRooms.length === 0 && (
         <p>
@@ -89,6 +103,14 @@ function MyRooms() {
                 <span className="room-name">{room.name}</span>
                 <span className="room-last">{room.id}</span>
               </div>
+              <button
+                type="button"
+                className="room-leave-btn"
+                onClick={(e) => handleLeave(e, room.id)}
+                disabled={leavingRoomId === room.id}
+              >
+                {leavingRoomId === room.id ? 'Leaving…' : 'Leave'}
+              </button>
             </li>
           ))}
         </ul>

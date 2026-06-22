@@ -42,3 +42,16 @@ export async function joinRoomApi(roomId, username) {
   }
   return data
 }
+
+export async function leaveRoomApi(roomId, username) {
+  const res = await fetch(`${BASE_URL}/${roomId}/leave`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    throw new Error(data.message || 'Failed to leave room')
+  }
+  return data
+}
