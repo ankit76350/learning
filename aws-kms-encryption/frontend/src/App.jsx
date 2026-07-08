@@ -58,6 +58,7 @@ function App() {
     }
   };
 
+  
   useEffect(() => {
     fetchStudents();
   }, []);
